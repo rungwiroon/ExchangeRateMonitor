@@ -2,13 +2,10 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ExchangeRate.Services.Models
+namespace ExchangeRate.Services.Models.SuperRich
 {
-    public class SuperRichResponse
+    public class SuperRichResponse : SuperRichResponseHeader
     {
-        public int code { get; set; }
-        public string descriptionEn { get; set; }
-        public string description { get; set; }
         public Data data { get; set; }
     }
 }

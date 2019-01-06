@@ -1,4 +1,6 @@
 ﻿using ExchangeRate.Services.Models;
+using ExchangeRate.Services.Models.SuperRich;
+using LanguageExt;
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
@@ -8,6 +10,7 @@ using System.Net.Http;
 using System.Net.Http.Headers;
 using System.Text;
 using System.Threading.Tasks;
+using static LanguageExt.Prelude;
 
 namespace ExchangeRate.Services.Services
 {
@@ -20,6 +23,7 @@ namespace ExchangeRate.Services.Services
         private string auturizationParamater = Convert.ToBase64String(
                     Encoding.ASCII.GetBytes(
                         string.Format("{0}:{1}", "superrichTh", "hThcirrepus")));
+        private string _successDescription = "Success";
 
         public SuperRichService(HttpClient httpClient)
         {
@@ -43,18 +47,35 @@ namespace ExchangeRate.Services.Services
             }));
         }
 
-        public async Task<IEnumerable<ExchangeRateModel>> Get()
+        //private static Either<string, IEnumerable<ExchangeRateModel>> MapToEither(SuperRichResponse response)
+        //{
+        //    if (response.descriptionEn != "Success")
+        //    {
+        //        return Left(response.descriptionEn);
+        //    }
+
+        //    return Right(MapModel(response));
+        //}
+
+        public async Task<Either<string, IEnumerable<ExchangeRateModel>>> Get()
         {
             var response = await _httpClient.GetAsync(_getLatestUrl);
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
 
+            var superRichResponseHeader = JsonConvert.DeserializeObject<SuperRichResponseHeader>(jsonResponse);
+
+            if(superRichResponseHeader.descriptionEn != _successDescription)
+            {
+                return Left(superRichResponseHeader.descriptionEn);
+            }
+
             var superRichResponse = JsonConvert.DeserializeObject<SuperRichResponse>(jsonResponse);
 
-            return MapModel(superRichResponse);
+            return Right(MapModel(superRichResponse));
         }
 
-        public async Task<IEnumerable<ExchangeRateModel>> Get(DateTime dateTime)
+        public async Task<Either<string, IEnumerable<ExchangeRateModel>>> Get(DateTime dateTime)
         {
             var content = new FormUrlEncodedContent(new[]
             {
@@ -65,12 +86,19 @@ namespace ExchangeRate.Services.Services
 
             var jsonResponse = await response.Content.ReadAsStringAsync();
 
+            var superRichResponseHeader = JsonConvert.DeserializeObject<SuperRichResponseHeader>(jsonResponse);
+
+            if (superRichResponseHeader.descriptionEn != _successDescription)
+            {
+                return Left(superRichResponseHeader.descriptionEn);
+            }
+
             var superRichResponse = JsonConvert.DeserializeObject<SuperRichResponse>(jsonResponse);
 
-            return MapModel(superRichResponse);
+            return Right(MapModel(superRichResponse));
         }
 
-        public async Task<IEnumerable<ExchangeRateModel>> Get(Currency currency, DateTime start, DateTime end)
+        public async Task<Either<string, IEnumerable<ExchangeRateModel>>> Get(Currency currency, DateTime start, DateTime end)
         {
             throw new NotImplementedException();
         }

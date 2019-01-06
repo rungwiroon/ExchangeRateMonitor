@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using System.Text;
 
-namespace ExchangeRate.Services.Models
+namespace ExchangeRate.Services.Models.SuperRich
 {
     public class Rate
     {

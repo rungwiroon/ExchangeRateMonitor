@@ -1,5 +1,6 @@
 ﻿using ExchangeRate.Services.Models;
 using ExchangeRate.Services.Services;
+using LanguageExt;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
@@ -33,7 +34,7 @@ namespace ExchangeRate
 
             try
             {
-                IEnumerable<ExchangeRateModel> result;
+                Either<string, IEnumerable<ExchangeRateModel>> result;
                 if(dateTimePicker1.Value.Date >= DateTime.Now.Date)
                 {
                     result = await _exchangeRateService.Get();
@@ -43,7 +44,17 @@ namespace ExchangeRate
                     result = await _exchangeRateService.Get(dateTimePicker1.Value.Date);
                 }
 
-                _exchangeRates = result.ToList();
+                result.Match(r =>
+                {
+                    _exchangeRates = r.ToList();
+                }, l =>
+                {
+                    MessageBox.Show(l, "Info", MessageBoxButtons.OK, MessageBoxIcon.Exclamation);
+                });
+            }
+            catch(Exception ex)
+            {
+                MessageBox.Show(ex.Message, "Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
             finally
             {

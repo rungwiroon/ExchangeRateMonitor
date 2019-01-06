@@ -33,5 +33,14 @@ namespace ExchangeRate.Services.Tests
 
             Assert.True(result.Any());
         }
+
+        [Fact]
+        public async Task WhenGetByDateOnNoData_ShouldReturnNoDataFoundText()
+        {
+            var service = new SuperRichService(_httpClient);
+            var result = await service.Get(new DateTime(2018, 12, 31));
+
+            Assert.True(result.IsLeft);
+        }
     }
 }
